@@ -1,0 +1,2 @@
+# Set_CircleCI
+Ansible、ServerspecをCircleCIを用いて自動化
