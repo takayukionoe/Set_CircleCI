@@ -1,0 +1,154 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: vpc/subnet/routetable/igw sample
+
+Parameters:
+  AvailabilityZoneA:
+    Description: Availability Zone A
+    Type: String
+  AvailabilityZoneB:
+    Description: Availability Zone B
+    Type: String
+
+Resources:
+  myVPC02:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'false'
+      Tags:
+        - Key: Name
+          Value: raisetech10th-myvpc02
+
+  myigw02:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: raisetech10th-myigw02
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref myVPC02
+      InternetGatewayId: !Ref myigw02
+  
+  PublicSubnet01a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneA
+      VpcId: !Ref myVPC02
+      CidrBlock: 10.0.0.0/20
+      Tags:
+        - Key: Name
+          Value: PublicSubnet01a
+
+  PublicSubnet01c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneB
+      VpcId: !Ref myVPC02
+      CidrBlock: 10.0.16.0/20
+      Tags:
+        - Key: Name
+          Value: PublicSubnet01c
+
+  PrivateSubnet01a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneA
+      VpcId: !Ref myVPC02
+      CidrBlock: 10.0.128.0/20
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet01a
+
+  PrivateSubnet01c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneB
+      VpcId: !Ref myVPC02
+      CidrBlock: 10.0.144.0/20
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet01c
+  
+  publicrouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref myVPC02
+      Tags:
+        - Key: Name
+          Value: publicrouteTable
+
+  route:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref publicrouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:  !Ref myigw02
+  
+  routeTableAssocPublic01:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet01a
+      RouteTableId: !Ref publicrouteTable
+
+  routeTableAssocPublic02:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet01c
+      RouteTableId: !Ref publicrouteTable
+
+  privaterouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref myVPC02
+      Tags:
+        - Key: Name
+          Value: privaterouteTable
+  
+  routeTableAssocPrivate01:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet01a
+      RouteTableId: !Ref privaterouteTable
+
+  routeTableAssocPrivate02:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet01c
+      RouteTableId: !Ref privaterouteTable
+
+Outputs:
+#stackname：stack01-1
+    StackVPC:
+        Description: VPC's ID
+        Value: !Ref myVPC02
+        Export:
+            Name: !Sub "${AWS::StackName}-VPCID"
+
+    StackPublicSubnet1A:
+        Description: Public Subnet's ID
+        Value: !Ref PublicSubnet01a
+        Export:
+            Name: !Sub "${AWS::StackName}-PublicSubnet1A"
+
+    StackPrivateSubnet1A:
+        Description: Private Subnet's ID
+        Value: !Ref PrivateSubnet01a
+        Export:
+            Name: !Sub "${AWS::StackName}-PrivateSubnet1A"
+
+    StackPublicSubnet1C:
+        Description: Public Subnet's ID
+        Value: !Ref PublicSubnet01c
+        Export:
+            Name: !Sub "${AWS::StackName}-PublicSubnet1C"
+
+    StackPrivateSubnet1C:
+        Description: Private Subnet's ID
+        Value: !Ref PrivateSubnet01c
+        Export:
+            Name: !Sub "${AWS::StackName}-PrivateSubnet1C"
+

@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: RDS sample
+#stackname：stack01-5
+
+Parameters:
+    DBMasterUserName:
+        Default: admin
+        Type: String
+    DBMasterUserPassword:
+        Default: Otlock4869
+        Type: String
+        NoEcho: 'true'
+    EngineVersion:
+        Default: 8.0.28
+        Type: String
+    StorageType:
+        Default: gp2
+        Type: String
+    InstanceClass:
+        Default: db.t3.micro
+        Type: String
+    StorageSize:
+        Default: 20
+        Type: String
+        
+Resources:
+    Onoedatabase02:
+        Type: AWS::RDS::DBInstance
+        Properties:
+            AllocatedStorage: !Ref 'StorageSize'
+            DBInstanceClass: !Ref 'InstanceClass'
+            DBInstanceIdentifier: Onoedatabase02
+            DBName: Onoedatabase02
+            DBSubnetGroupName: !Ref 'DBSubnetGroup'
+            Engine: mysql
+            EngineVersion: !Ref 'EngineVersion'
+            StorageType: !Ref 'StorageType'
+            MasterUserPassword: !Ref 'DBMasterUserPassword'
+            MasterUsername: !Ref 'DBMasterUserName'
+            PubliclyAccessible: 'false'
+            StorageEncrypted: 'false'
+            CopyTagsToSnapshot: 'false'
+            DeleteAutomatedBackups: 'true'
+            MultiAZ: 'false'
+            BackupRetentionPeriod: 0
+            VPCSecurityGroups:
+            - !ImportValue stack01-3-Security03
+      
+    DBSubnetGroup:
+        Properties:
+            DBSubnetGroupDescription: sample-rds
+            DBSubnetGroupName: samplerds
+            SubnetIds:
+            - !ImportValue stack01-1-PrivateSubnet1A
+            - !ImportValue stack01-1-PrivateSubnet1C
+        Type: AWS::RDS::DBSubnetGroup

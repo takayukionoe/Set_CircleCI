@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: ALB sample
+#stackname：stack01-2
+Resources:
+  InternetALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: raisetech10th-ALB-02
+      IpAddressType: ipv4
+      Scheme: internet-facing
+      Type: application
+      SecurityGroups:
+           - !ImportValue stack01-3-Security01
+      Subnets:
+           - !ImportValue stack01-1-PublicSubnet1A
+           - !ImportValue stack01-1-PublicSubnet1C
+  
+  TargetGroupResource:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: raisetech10th-target-02
+      VpcId: !ImportValue stack01-1-VPCID
+      IpAddressType: ipv4
+      Protocol: HTTP
+      ProtocolVersion: HTTP1
+      Port: 80
+      TargetType: instance
+      Targets:
+          - Id: !ImportValue stack01-4-EC2ID
+            Port: 80
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 2
+      Matcher:
+          HttpCode: 200
+      Tags:
+          - Key: Name
+            Value: raisetech10th-target-02
+
+  ALBListenerHTTP:
+        Type: AWS::ElasticLoadBalancingV2::Listener
+        Properties:
+            Port: 80
+            Protocol: HTTP
+            DefaultActions:
+                - TargetGroupArn: !Ref TargetGroupResource
+                  Type: forward
+            LoadBalancerArn: !Ref InternetALB
+
