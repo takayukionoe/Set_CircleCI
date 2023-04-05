@@ -1,0 +1,11 @@
+---
+# クローン
+- name: Clone the repository
+  git:
+    repo: "https://github.com/yuta-ushijima/raisetech-live8-sample-app.git"
+    dest: "/var/www/raisetech-live8-sample-app"
+    update: no
+
+- name: Change ownership of /var/www to ec2-user
+  become: yes
+  command: chown ec2-user /var/www

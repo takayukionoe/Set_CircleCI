@@ -1,0 +1,30 @@
+---
+- name: Add Node.js repository
+  ansible.builtin.shell: curl --silent --location https://rpm.nodesource.com/setup_14.x | sudo bash -
+  args:
+    warn: no
+  become: yes
+  tags:
+    - nodejs
+
+- name: Install Node.js
+  ansible.builtin.yum:
+    name: nodejs
+    state: latest
+  become: yes
+  tags:
+    - nodejs
+
+- name: Check Node.js version
+  ansible.builtin.command:
+    cmd: node --version
+  register: node_version
+  tags:
+    - nodejs
+
+- name: Display Node.js version
+  ansible.builtin.debug:
+    msg: "Node.js version: {{ node_version.stdout }}"
+  tags:
+    - nodejs
+

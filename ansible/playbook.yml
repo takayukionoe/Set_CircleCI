@@ -1,0 +1,12 @@
+---
+- hosts: 18.181.38.231
+  become: yes
+  roles:
+    - { role: git, tags: git }
+    - { role: package, tags: package }
+    - { role: clone, tags: clone }
+    - { role: ruby, tags: ruby }
+    - { role: mysql, tags: mysql }
+    - { role: nginx, tags: nginx }
+    - { role: unicorn, tags: unicorn }
+    - { role: deploy, tags: deploy }

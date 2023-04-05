@@ -1,0 +1,2 @@
+[target]
+18.181.38.231 ansible_user='ec2-user'
