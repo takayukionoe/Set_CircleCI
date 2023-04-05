@@ -1,0 +1,63 @@
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@3.1.4
+  ansible-playbook: orbss/ansible-playbook@0.0.5
+  ruby: circleci/ruby@2.0.0
+
+jobs:
+  executeCloudFormation:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: AWS_DEFAULT_REGION
+      - run:
+          name: deploy CloudFormation
+          command: |
+            set -x
+            aws cloudformation deploy --template cloudformation/VPC.yml --stack-name stack01-1
+            aws cloudformation deploy --template cloudformation/ALB.yml --stack-name stack01-2
+            aws cloudformation deploy --template cloudformation/Security.yml --stack-name stack01-3
+            aws cloudformation deploy --template cloudformation/EC2.yml --stack-name stack01-4
+            aws cloudformation deploy --template cloudformation/RDS.yml --stack-name stack01-5
+  executeAnsible:
+    executor: ansible-playbook/default
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - 2f:f8:f2:1f:3b:9f:71:60:d1:96:32:28:c6:c2:28:4c
+      - ansible-playbook/install:
+          version: '2.10.7'
+      - ansible-playbook/playbook:
+          playbook: ansible/playbook.yml
+          playbook-options: '-u ec2-user -i ansible/hosts/inventory --private-key ~/.ssh/id_rsa'
+  executeServerspec:
+    docker:
+      - image: 'cimg/base:stable'
+    steps:
+      - checkout
+      - ruby/install:
+          version: '3.1.2'
+      - run :
+          name: executeServerspec
+          command: |
+            gem install bundler
+            gem install serverspec
+            gem install rake
+            gem install ed25519
+            gem install bcrypt_pbkdf
+            rake spec
+workflows:
+  raisetech-lecture13:
+    jobs:
+      - executeCloudFormation
+      - executeAnsible:
+          requires:
+            - executeCloudFormation
+      - executeServerspec:
+          requires: 
+            - executeAnsible
