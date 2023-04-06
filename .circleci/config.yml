@@ -1,0 +1,60 @@
+version: 2.1
+
+orbs:
+  ansible: orbss/ansible-playbook@0.0.5
+  aws-cli: circleci/aws-cli@3.1.5
+  ruby: circleci/ruby@1.2.0
+
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/configuration-reference/#jobs
+jobs:
+  deploy-cloudformation-stacks:
+    executor: aws-cli/default
+    steps:
+      - aws-cli/setup
+      - run:
+          name: Deploy All CloudFormation Stacks
+          command: |
+            aws cloudformation deploy --template-file cloudformation/VPC.yml --stack-name stack01-1 
+            aws cloudformation deploy --template-file cloudformation/ALB.yml --stack-name stack01-2
+            aws cloudformation deploy --template-file cloudformation/SecurityGroup.yml --stack-name stack01-3 
+            aws cloudformation deploy --template-file cloudformation/EC2.yml --stack-name stack01-4
+            aws cloudformation deploy --template-file cloudformation/RDS.yml --stack-name stack01-5
+  
+  run-ansible-playbook:
+    executor: ansible/default
+    steps:
+      - checkout
+      - ansible/install
+      - run:
+          name: Set up SSH key
+          command: |
+            echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+      - run:
+          name: Run Ansible playbook
+          command: ansible-playbook -i ansible/inventory ansible/playbook.yml
+
+  run-serverspec:
+    executor: ruby/default
+    steps:
+      - checkout
+      - ruby/install-deps
+      - run:
+          name: Install Serverspec and run tests
+          command: |
+            gem install serverspec
+            rake --rakefile=serverspec/Rakefile spec
+
+workflows:
+  version: 2
+  deploy_and_test:
+    jobs:
+      - deploy-cloudformation-stacks
+      - run-ansible-playbook:
+          requires:
+            - deploy-cloudformation-stacks
+      - run-serverspec:
+          requires:
+            - run-ansible-playbook
