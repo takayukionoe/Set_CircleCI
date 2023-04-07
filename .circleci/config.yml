@@ -21,9 +21,9 @@ jobs:
           name: Deploy All CloudFormation Stacks
           command: |
             aws cloudformation deploy --template-file cloudformation/VPC.yml --stack-name stack01-1 
-            aws cloudformation deploy --template-file cloudformation/ALB.yml --stack-name stack01-2
             aws cloudformation deploy --template-file cloudformation/SecurityGroup.yml --stack-name stack01-3 
             aws cloudformation deploy --template-file cloudformation/EC2.yml --stack-name stack01-4
+            aws cloudformation deploy --template-file cloudformation/ALB.yml --stack-name stack01-2
             aws cloudformation deploy --template-file cloudformation/RDS.yml --stack-name stack01-5
   
   run-ansible-playbook:
