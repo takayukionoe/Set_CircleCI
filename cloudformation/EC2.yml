@@ -1,3 +1,50 @@
+# AWSTemplateFormatVersion: "2010-09-09"
+# Description: ec2-instance sample
+# #stackname：stack01-4
+
+# Parameters:
+#   LinuxAMI:
+#     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+#     Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+
+# Resources:
+#     NewKeyPair:
+#         Type: AWS::EC2::KeyPair
+#         Properties:
+#             KeyName: raisetech4thv2
+
+#     raisetech10thEC2:
+#         Type: AWS::EC2::Instance
+#         Properties:
+#             ImageId: !Ref LinuxAMI
+#             KeyName: !Ref NewKeyPair
+#             InstanceType: t2.micro
+#             InstanceInitiatedShutdownBehavior: stop
+#             Tenancy: default
+#             NetworkInterfaces:
+#                 - AssociatePublicIpAddress: "true"
+#                   DeviceIndex: "0"
+#                   SubnetId: !ImportValue stack01-1-PublicSubnet1A
+#                   GroupSet:
+#                       - !ImportValue stack01-3-Security02
+
+#             Tags:
+#                 - Key: Name
+#                   Value: raisetech10th_EC2
+
+#             BlockDeviceMappings:
+#                 - DeviceName: /dev/xvda
+#                   Ebs:
+#                       VolumeType: gp2
+#                       DeleteOnTermination: true
+#                       VolumeSize: 8
+# Outputs:
+#     StackEC2:
+#         Description: EC2 ID
+#         Value: !Ref raisetech10thEC2
+#         Export:
+#             Name: !Sub "${AWS::StackName}-EC2ID"
+
 AWSTemplateFormatVersion: "2010-09-09"
 Description: ec2-instance sample
 #stackname：stack01-4
@@ -6,18 +53,17 @@ Parameters:
   LinuxAMI:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+  KeyName:
+    Type: String
+    Description: "Name of an existing EC2 KeyPair to enable SSH access to the instance."
+    Default: raisetech4thv2
 
 Resources:
-    NewKeyPair:
-        Type: AWS::EC2::KeyPair
-        Properties:
-            KeyName: raisetech4thv2
-
     raisetech10thEC2:
         Type: AWS::EC2::Instance
         Properties:
             ImageId: !Ref LinuxAMI
-            KeyName: !Ref NewKeyPair
+            KeyName: !Ref KeyName
             InstanceType: t2.micro
             InstanceInitiatedShutdownBehavior: stop
             Tenancy: default
@@ -44,4 +90,4 @@ Outputs:
         Value: !Ref raisetech10thEC2
         Export:
             Name: !Sub "${AWS::StackName}-EC2ID"
-
+              
