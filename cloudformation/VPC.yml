@@ -121,7 +121,7 @@ Resources:
       RouteTableId: !Ref privaterouteTable
 
 Outputs:
-#stackname：stack01-1
+#stackname：VPC-subnet-01
     StackVPC:
         Description: VPC's ID
         Value: !Ref myVPC02

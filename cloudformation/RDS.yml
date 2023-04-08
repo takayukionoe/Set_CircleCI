@@ -44,13 +44,13 @@ Resources:
             MultiAZ: 'false'
             BackupRetentionPeriod: 0
             VPCSecurityGroups:
-            - !ImportValue stack01-3-Security03
+            - !ImportValue Security-01-Security03
       
     DBSubnetGroup:
         Properties:
             DBSubnetGroupDescription: sample-rds
             DBSubnetGroupName: samplerds
             SubnetIds:
-            - !ImportValue stack01-1-PrivateSubnet1A
-            - !ImportValue stack01-1-PrivateSubnet1C
+            - !ImportValue VPC-subnet-01-PrivateSubnet1A
+            - !ImportValue VPC-subnet-01-PrivateSubnet1C
         Type: AWS::RDS::DBSubnetGroup

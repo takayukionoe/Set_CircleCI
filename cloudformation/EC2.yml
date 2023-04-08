@@ -70,9 +70,9 @@ Resources:
             NetworkInterfaces:
                 - AssociatePublicIpAddress: "true"
                   DeviceIndex: "0"
-                  SubnetId: !ImportValue stack01-1-PublicSubnet1A
+                  SubnetId: !ImportValue VPC-subnet-01-PublicSubnet1A
                   GroupSet:
-                      - !ImportValue stack01-3-Security02
+                      - !ImportValue Security-01-Security02
 
             Tags:
                 - Key: Name
@@ -90,4 +90,3 @@ Outputs:
         Value: !Ref raisetech10thEC2
         Export:
             Name: !Sub "${AWS::StackName}-EC2ID"
-              
