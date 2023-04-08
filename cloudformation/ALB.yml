@@ -5,7 +5,7 @@ Resources:
   InternetALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: raisetech10th-ALB-02
+      Name: raisetech10th-ALB-03
       IpAddressType: ipv4
       Scheme: internet-facing
       Type: application
@@ -18,7 +18,7 @@ Resources:
   TargetGroupResource:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: raisetech10th-target-02
+      Name: raisetech10th-target-03
       VpcId: !ImportValue VPC-subnet-01-VPCID
       IpAddressType: ipv4
       Protocol: HTTP
@@ -40,7 +40,7 @@ Resources:
           HttpCode: 200
       Tags:
           - Key: Name
-            Value: raisetech10th-target-02
+            Value: raisetech10th-target-03
 
   ALBListenerHTTP:
         Type: AWS::ElasticLoadBalancingV2::Listener
