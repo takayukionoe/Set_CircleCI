@@ -24,12 +24,12 @@ Parameters:
         Type: String
         
 Resources:
-    Onoedatabase02:
+    Onoedatabase03:
         Type: AWS::RDS::DBInstance
         Properties:
             AllocatedStorage: !Ref 'StorageSize'
             DBInstanceClass: !Ref 'InstanceClass'
-            DBInstanceIdentifier: Onoedatabase02
+            DBInstanceIdentifier: Onoedatabase03
             DBName: Onoedatabase02
             DBSubnetGroupName: !Ref 'DBSubnetGroup'
             Engine: mysql
