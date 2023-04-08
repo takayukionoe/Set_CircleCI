@@ -48,8 +48,8 @@ Resources:
       
     DBSubnetGroup:
         Properties:
-            DBSubnetGroupDescription: sample-rds
-            DBSubnetGroupName: samplerds
+            DBSubnetGroupDescription: raisetech13th-rds
+            DBSubnetGroupName: raisetech13th-rds
             SubnetIds:
             - !ImportValue VPC-subnet-01-PrivateSubnet1A
             - !ImportValue VPC-subnet-01-PrivateSubnet1C
