@@ -39,6 +39,18 @@ jobs:
   #     - ansible-playbook/playbook:
   #         playbook: ansible/playbook.yml
   #         playbook-options: '-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2.pem'
+  upgrade-pip:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: AWS_DEFAULT_REGION
+      - run:
+          name: Upgrade pip
+          command: |
+            sudo pip install --upgrade pip
 
   run-ansible-playbook:
       executor: ansible-playbook/default
