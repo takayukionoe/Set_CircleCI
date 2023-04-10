@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  ansible: orbss/ansible-playbook@0.0.5
+  ansible: circleci/ansible@1.1.0
   aws-cli: circleci/aws-cli@3.1.5
   ruby: circleci/ruby@1.2.0
 
@@ -32,7 +32,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - d7:9f:96:ee:bf:70:d3:ea:da:27:f5:56:0b:82:a3:79:56:2c:ab:49
+          - d7:9f:96:ee:bf:70:d3:ea:da:27:f5:56:0b:82:a3:79:56:2c:ab:49
       # - ansible/install
       # - run:
       #     name: Set up SSH key
