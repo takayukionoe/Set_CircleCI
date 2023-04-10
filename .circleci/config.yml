@@ -30,6 +30,19 @@ jobs:
     executor: ansible/default
     steps:
       - checkout
+      - run:
+          name: Install Ansible
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y software-properties-common
+            sudo apt-add-repository --yes --update ppa:ansible/ansible
+            sudo apt-get install -y ansible
+          # Ansible SSH接続時のホスト鍵自動登録を有効化
+      - run:
+          name: Enable Host Key Checking
+          command: |
+            mkdir -p ~/.ssh
+            echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
       - add_ssh_keys:
           fingerprints:
           - d7:9f:96:ee:bf:70:d3:ea:da:27:f5:56:0b:82:a3:79:56:2c:ab:49
