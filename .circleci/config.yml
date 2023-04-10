@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  ansible: ansible/ansible@1.2.0
+  ansible: orbss/ansible-playbook@0.0.5
   aws-cli: circleci/aws-cli@3.1.5
   ruby: circleci/ruby@1.2.0
 
@@ -42,12 +42,12 @@ jobs:
       # - run:
       #     name: Run Ansible playbook
       #     command: ansible-playbook -i ansible/inventory ansible/playbook.yml
-      - ansible-playbook/install:
-          version: '2.10.7'
-      - ansible-playbook/playbook:
-          playbook: ansible/playbook.yml
-          playbook-options: '-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2'
+      - ansible/install
+      - run:
+          name: Run Ansible playbook
+          command: ansible-playbook -i ansible/inventory ansible/playbook.yml \-u ec2-user \--private-key ~/.ssh/raisetech4thv2
 
+          
   run-serverspec:
     executor: ruby/default
     steps:
