@@ -27,33 +27,17 @@ jobs:
             aws cloudformation deploy --template-file cloudformation/RDS.yml --stack-name RDS-01
   
   run-ansible-playbook:
-    executor: ansible/default
+    executor: ansible-playbook/default
     steps:
       - checkout
       - add_ssh_keys:
           fingerprints:
-          - d7:9f:96:ee:bf:70:d3:ea:da:27:f5:56:0b:82:a3:79:56:2c:ab:49
-      # - ansible/install
-      # - run:
-      #     name: Set up SSH key
-      #     command: |
-      #       echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-      #       chmod 600 ~/.ssh/id_rsa
-      # - run:
-      #     name: Run Ansible playbook
-      #     command: ansible-playbook -i ansible/inventory ansible/playbook.yml
-      - ansible/install
-      - run:
-          name: Install Ansible 2.12
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y software-properties-common
-            sudo add-apt-repository -y ppa:ansible/ansible-2.12
-            sudo apt-get update
-            sudo apt-get install -y ansible
-      - run:
-          name: Run Ansible playbook
-          command: ansible-playbook -i ansible/inventory ansible/playbook.yml \-u ec2-user \--private-key ~/.ssh/raisetech4thv2
+            - d7:9f:96:ee:bf:70:d3:ea:da:27:f5:56:0b:82:a3:79:56:2c:ab:49
+      - ansible-playbook/install:
+          version: '2.10.7'
+      - ansible-playbook/playbook:
+          playbook: ansible/playbook.yml
+          playbook-options: '-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2.pem'
 
           
   run-serverspec:
