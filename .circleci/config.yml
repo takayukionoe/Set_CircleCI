@@ -44,6 +44,14 @@ jobs:
       #     command: ansible-playbook -i ansible/inventory ansible/playbook.yml
       - ansible/install
       - run:
+          name: Install Ansible 2.12
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y software-properties-common
+            sudo add-apt-repository -y ppa:ansible/ansible-2.12
+            sudo apt-get update
+            sudo apt-get install -y ansible
+      - run:
           name: Run Ansible playbook
           command: ansible-playbook -i ansible/inventory ansible/playbook.yml \-u ec2-user \--private-key ~/.ssh/raisetech4thv2
 
