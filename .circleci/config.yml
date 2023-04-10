@@ -40,18 +40,18 @@ jobs:
   #         playbook: ansible/playbook.yml
   #         playbook-options: '-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2.pem'
 
-    run-ansible-playbook:
-        executor: ansible-playbook/default
-        steps:
-          - checkout
-          - add_ssh_keys:
-              fingerprints:
-                - d7:9f:96:ee:bf:70:d3:ea:da:27:f5:56:0b:82:a3:79:56:2c:ab:49
-          - ansible-playbook/install:
-              version: '2.12.0'
-          - ansible-playbook/playbook:
-              playbook: ansible/playbook.yml
-              playbook-options: '-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2.pem'
+  run-ansible-playbook:
+      executor: ansible-playbook/default
+      steps:
+        - checkout
+        - add_ssh_keys:
+            fingerprints:
+              - d7:9f:96:ee:bf:70:d3:ea:da:27:f5:56:0b:82:a3:79:56:2c:ab:49
+        - ansible-playbook/install:
+            version: '2.12.0'
+        - ansible-playbook/playbook:
+            playbook: ansible/playbook.yml
+            playbook-options: '-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2.pem'
 
   run-serverspec:
     executor: ruby/default
