@@ -11,30 +11,41 @@
     - readline-devel
     - zlib-devel
 
-- name: Install rbenv
-  become: yes
+- name: rbenvがインストール済か確認
+  shell: "{{ rbenv_path }}/bin/rbenv --version"
+  register: rbenv_exists
+  changed_when: False
+  ignore_errors: yes
+
+- name: rbenvが未インストールならrbenvをインストール
   git:
-    repo: "https://github.com/rbenv/rbenv.git"
-    dest: "/usr/local/rbenv"
-    update: no
-  register: rbenv_install
+    repo: https://github.com/sstephenson/rbenv.git
+    dest: "{{ rbenv_path }}"
+  when: rbenv_exists is failed
 
-- name: Add rbenv to PATH and initialize it
-  lineinfile:
-    dest: "~/.bash_profile"
-    line: "{{ item }}"
-  with_items:
-    - 'export PATH="$HOME/.rbenv/bin:$PATH"'
-    - 'eval "$(rbenv init -)"'
-  when: rbenv_install.changed
+- name: ruby-buildをインストール
+  git:
+    repo: https://github.com/sstephenson/ruby-build.git
+    dest: "{{ rbenv_path }}/plugins/ruby-build"
+  when: rbenv_exists is failed
 
-- name: Reload .bash_profile
-  become: yes
-  command: ". ~/.bash_profile"
-  when: rbenv_install.changed
+- name: rbenv installを実行できるようにする
+  # ec2-userで実行
+  become_user: ec2-user
+  command: "{{ rbenv_path }}/plugins/ruby-build/install.sh"
+  when:  rbenv_exists is failed
 
-- name: Check rbenv version
-  shell: "rbenv --version"
+- name: 環境変数PATHにrbenvのパスを設定
+  blockinfile:
+    dest: "{{ home_path }}/.bash_profile"
+    create: yes
+    insertafter: '^PATH=\$PATH:\$HOME/bin$'
+    content: |
+      export RBENV_ROOT={{ rbenv_path }}
+      export PATH="$RBENV_ROOT/bin:$PATH"
+      eval "$(rbenv init -)"
+  when: rbenv_exists is failed
+
 
 # - name: Install rbenv and dependencies
 #   ansible.builtin.shell: curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
