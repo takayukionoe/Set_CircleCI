@@ -1,14 +1,10 @@
 version: 2.1
 
 orbs:
-  # ansible: orbss/ansible-playbook@0.0.5
   ansible-playbook: orbss/ansible-playbook@0.0.5
   aws-cli: circleci/aws-cli@3.1.5
   ruby: circleci/ruby@1.2.0
 
-
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/configuration-reference/#jobs
 jobs:
   deploy-cloudformation-stacks:
     executor: aws-cli/default
@@ -26,7 +22,7 @@ jobs:
             aws cloudformation deploy --template-file cloudformation/EC2.yml --stack-name EC2-01
             aws cloudformation deploy --template-file cloudformation/ALB.yml --stack-name ALB-01
             aws cloudformation deploy --template-file cloudformation/RDS.yml --stack-name RDS-01
-            
+
   run-ansible-playbook:
     executor: ansible-playbook/default
     steps:
@@ -35,7 +31,7 @@ jobs:
           fingerprints:
             - 60:37:52:e2:ae:57:cd:d2:d7:ff:99:20:23:63:b0:83
       - ansible-playbook/install:
-          version: '2.12.0'
+          version: '2.10.7'
       - ansible-playbook/playbook:
           playbook: ansible/playbook.yml
           playbook-options: '-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2.pem'
