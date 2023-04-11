@@ -18,7 +18,6 @@
       - libxml2-devel
       - libxslt-devel
       - mysql-devel
-      - nodejs
     state: latest
 
 # nodejsのインストール
