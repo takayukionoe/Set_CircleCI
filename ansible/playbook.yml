@@ -3,10 +3,10 @@
   become: yes
   roles:
     - { role: git, tags: git }
-    - { role: package, tags: package }
-    - { role: clone, tags: clone }
     - { role: ruby, tags: ruby }
+    - { role: package, tags: package }
     - { role: mysql, tags: mysql }
+    - { role: clone, tags: clone }
     - { role: nginx, tags: nginx }
     - { role: unicorn, tags: unicorn }
     - { role: deploy, tags: deploy }
