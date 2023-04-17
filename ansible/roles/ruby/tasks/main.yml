@@ -11,73 +11,59 @@
     - readline-devel
     - zlib-devel
 
-- name: rbenvがインストール済か確認
-  shell: "{{ rbenv_path }}/bin/rbenv --version"
+- name: Check rbenv install
+  stat:
+    path: "{{ rbenv_path }}"
   register: rbenv_exists
-  changed_when: False
-  ignore_errors: yes
 
-- name: rbenvが未インストールならrbenvをインストール
-  git:
-    repo: https://github.com/sstephenson/rbenv.git
-    dest: "{{ rbenv_path }}"
-  when: rbenv_exists is failed
-
-- name: ruby-buildをインストール
-  git:
-    repo: https://github.com/sstephenson/ruby-build.git
-    dest: "{{ rbenv_path }}/plugins/ruby-build"
-  when: rbenv_exists is failed
-
-- name: rbenv installを実行できるようにする
-  # ec2-userで実行
+- name: Download rbenv_ruby-build
   become_user: ec2-user
-  command: "{{ rbenv_path }}/plugins/ruby-build/install.sh"
-  when:  rbenv_exists is failed
+  uri:
+    url: https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer
+    return_content: yes
+  register: rbenv_installer
+  when: not rbenv_exists.stat.exists
 
-- name: 環境変数PATHにrbenvのパスを設定
-  blockinfile:
-    dest: "{{ home_path }}/.bash_profile"
-    create: yes
-    insertafter: '^PATH=\$PATH:\$HOME/bin$'
-    content: |
-      export RBENV_ROOT={{ rbenv_path }}
-      export PATH="$RBENV_ROOT/bin:$PATH"
-      eval "$(rbenv init -)"
-  when: rbenv_exists is failed
-
-
-# - name: Install rbenv and dependencies
-#   ansible.builtin.shell: curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
-#   args:
-#     executable: /bin/bash
-
-# - name: Add rbenv to PATH and initialize it
-#   ansible.builtin.lineinfile:
-#     path: /home/ec2-user/.bash_profile
-#     line: '{{ item }}'
-#   with_items:
-#     - 'export PATH="$HOME/.rbenv/bin:$PATH"'
-#     - 'eval "$(rbenv init -)"'
-
-# - name: Reload .bash_profile
-#   ansible.builtin.shell: source /home/ec2-user/.bash_profile
-#   args:
-#     executable: /bin/bash
-
-# - name: Check rbenv version
-#   ansible.builtin.command: rbenv --version
-
-- name: Install Ruby 3.1.2
-  ansible.builtin.command: rbenv install 3.1.2
+- name: Run rbenv_ruby-build
+  become_user: ec2-user
+  shell: "{{ rbenv_installer.content }}"
   args:
-    creates: /home/ec2-user/.rbenv/versions/3.1.2
+    chdir: /home/ec2-user/
+  when: not rbenv_exists.stat.exists
 
-- name: Set Ruby 3.1.2 as the global version
-  ansible.builtin.command: rbenv global 3.1.2
+- name: Add rbenv to PATH
+  lineinfile: 
+    path: /home/ec2-user/.bash_profile
+    line: 'export PATH="$HOME/.rbenv/bin:$PATH"'
 
-- name: Run rbenv rehash
-  ansible.builtin.command: rbenv rehash
+- name: eval rbenv init
+  lineinfile: 
+    path: /home/ec2-user/.bash_profile
+    line: 'eval "$(rbenv init -)"'
 
-- name: Check Ruby version
-  ansible.builtin.command: ruby --version
+- name: Load rbenv setting
+  become_user: ec2-user
+  shell: bash -lc "source ~/.bash_profile"
+
+- name: Check ruby installed
+  stat: 
+    path: "{{ rbenv_path }}/shims/ruby"
+  register: rbenv_check_install
+
+- name: Install Ruby
+  become_user: ec2-user
+  shell: bash -lc "rbenv install {{ ruby_version }}"
+  when: not rbenv_check_install.stat.exists
+
+- name: Set default Ruby version g
+  become_user: ec2-user
+  shell: bash -lc "rbenv global {{ ruby_version }}"
+
+- name: Set default Ruby version h
+  become_user: ec2-user
+  shell: bash -lc "rbenv rehash"
+
+- name: Load ruby setting
+  become_user: ec2-user
+  shell: bash -lc "source ~/.bash_profile"
+
