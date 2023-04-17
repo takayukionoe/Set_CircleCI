@@ -12,7 +12,7 @@
     - zlib-devel
 
 - name: Check rbenv install
-  stat:
+  stat: #statモジュールは、
     path: "{{ rbenv_path }}"
   register: rbenv_exists
 
