@@ -1,60 +1,153 @@
 version: 2.1
 
 orbs:
-  ansible-playbook: orbss/ansible-playbook@0.0.5
-  aws-cli: circleci/aws-cli@3.1.5
-  ruby: circleci/ruby@1.2.0
+  terraform: circleci/terraform@3.1.0
+  terraform-tflint: hqo/terraform@1.0.3
+  ansible: orbss/ansible-playbook@0.0.5
+  aws-cli: circleci/aws-cli@3.1.3
+  ruby: circleci/ruby@1.8.0
+
+commands:
+  install-tflint:
+    description: "Install TFLint"
+    steps:
+      - run:
+          command: wget -P /tmp https://github.com/terraform-linters/tflint/releases/download/v0.38.1/tflint_linux_amd64.zip && unzip /tmp/tflint_linux_amd64.zip -d /usr/local/bin
 
 jobs:
-  deploy-cloudformation-stacks:
-    executor: aws-cli/default
+  check_by_tflint:
+    executor: terraform/default
     steps:
       - checkout
-      - aws-cli/setup:
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          aws-region: AWS_DEFAULT_REGION
+      - install-tflint
       - run:
-          name: Deploy All CloudFormation Stacks
+          name: tflint
           command: |
-            aws cloudformation deploy --template-file cloudformation/VPC.yml --stack-name VPC-subnet-01 
-            aws cloudformation deploy --template-file cloudformation/SecurityGroup.yml --stack-name Security-01 
-            aws cloudformation deploy --template-file cloudformation/EC2.yml --stack-name EC2-01
-            aws cloudformation deploy --template-file cloudformation/ALB.yml --stack-name ALB-01
-            aws cloudformation deploy --template-file cloudformation/RDS.yml --stack-name RDS-01
-
-  run-ansible-playbook:
-    executor: ansible-playbook/default
+            cd lecture12/terraform/dev && terraform init
+            tflint --init && tflint
+  setup-by-ansible:
+    executor: ansible/default
     steps:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - 60:37:52:e2:ae:57:cd:d2:d7:ff:99:20:23:63:b0:83
-      - ansible-playbook/install:
-          version: '2.10.7'
-      - ansible-playbook/playbook:
-          playbook: ansible/playbook.yml
-          playbook-options: '-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2.pem'
-
-  run-serverspec:
-    executor: ruby/default
-    steps:
-      - checkout
-      - ruby/install-deps
-      - run:
-          name: Install Serverspec and run tests
-          command: |
-            gem install serverspec
-            rake --rakefile=serverspec/Rakefile spec
-
+            - b5:a8:cb:13:7d:b6:19:9b:5f:53:e4:e8:ca:75:41:e4
+      - ansible/install:
+          version: 2.10.3
+      - ansible/playbook:
+          playbook: lecture12/ansible/playbook.yml
+          playbook-options: "-u ec2-user -i lecture12/ansible/inventory --private-key ~/.ssh/udemysample.pem"
+  # serverspec:
+  #   executor: ruby/default
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: set
+  #         command: |
+  #           gem install bundler
+  #           gem install serverspec
+  #           gem install rake
+  #           echo ${KEY_FINGERPRINT} > ~/.ssh/serverspec.pem
+  #           mv lecture12/spec/config ~/.ssh/
+  #           cd lecture12
+  #           rake spec
 workflows:
-  version: 2
-  deploy_and_test:
+  deploy_infrastructure:
     jobs:
-      - deploy-cloudformation-stacks
-      - run-ansible-playbook:
+      - terraform/fmt:
+          checkout: true
+          context: terraform
+          path: lecture12/terraform/dev
+      - terraform/validate:
+          checkout: true
+          context: terraform
+          path: lecture12/terraform/dev
           requires:
-            - deploy-cloudformation-stacks
-      - run-serverspec:
+            - terraform/fmt
+      - check_by_tflint:
           requires:
-            - run-ansible-playbook
+            - terraform/validate
+      - terraform/plan:
+          checkout: true
+          context: terraform
+          path: lecture12/terraform/dev
+          persist-workspace: true
+          requires:
+            - check_by_tflint
+      - terraform/apply:
+          attach-workspace: true
+          context: terraform
+          path: lecture12/terraform/dev
+          filters:
+            branches:
+              only: main
+          requires:
+            - terraform/plan
+      - setup-by-ansible:
+          requires:
+            - terraform/apply
+      # - serverspec:
+      #     requires:
+      #       - setup-by-ansible
+
+
+# version: 2.1
+
+# orbs:
+#   ansible-playbook: orbss/ansible-playbook@0.0.5
+#   aws-cli: circleci/aws-cli@3.1.5
+#   ruby: circleci/ruby@1.2.0
+
+# jobs:
+#   deploy-cloudformation-stacks:
+#     executor: aws-cli/default
+#     steps:
+#       - checkout
+#       - aws-cli/setup:
+#           aws-access-key-id: AWS_ACCESS_KEY_ID
+#           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+#           aws-region: AWS_DEFAULT_REGION
+#       - run:
+#           name: Deploy All CloudFormation Stacks
+#           command: |
+#             aws cloudformation deploy --template-file cloudformation/VPC.yml --stack-name VPC-subnet-01 
+#             aws cloudformation deploy --template-file cloudformation/SecurityGroup.yml --stack-name Security-01 
+#             aws cloudformation deploy --template-file cloudformation/EC2.yml --stack-name EC2-01
+#             aws cloudformation deploy --template-file cloudformation/ALB.yml --stack-name ALB-01
+#             aws cloudformation deploy --template-file cloudformation/RDS.yml --stack-name RDS-01
+
+#   run-ansible-playbook:
+#     executor: ansible-playbook/default
+#     steps:
+#       - checkout
+#       - add_ssh_keys:
+#           fingerprints:
+#             - 60:37:52:e2:ae:57:cd:d2:d7:ff:99:20:23:63:b0:83
+#       - ansible-playbook/install:
+#           version: '2.10.7'
+#       - ansible-playbook/playbook:
+#           playbook: ansible/playbook.yml
+#           playbook-options: '-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2.pem'
+
+#   run-serverspec:
+#     executor: ruby/default
+#     steps:
+#       - checkout
+#       - ruby/install-deps
+#       - run:
+#           name: Install Serverspec and run tests
+#           command: |
+#             gem install serverspec
+#             rake --rakefile=serverspec/Rakefile spec
+
+# workflows:
+#   version: 2
+#   deploy_and_test:
+#     jobs:
+#       - deploy-cloudformation-stacks
+#       - run-ansible-playbook:
+#           requires:
+#             - deploy-cloudformation-stacks
+#       - run-serverspec:
+#           requires:
+#             - run-ansible-playbook
