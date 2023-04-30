@@ -23,7 +23,7 @@ jobs:
       - run:
           name: tflint
           command: |
-            cd lecture12/terraform/dev && terraform init
+            cd terraform/dev && terraform init
             tflint --init && tflint
   setup-by-ansible:
     executor: ansible/default
@@ -31,12 +31,12 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - b5:a8:cb:13:7d:b6:19:9b:5f:53:e4:e8:ca:75:41:e4
+            - e8:25:05:90:24:a7:d9:15:36:0c:d5:d6:36:ee:9b:74
       - ansible/install:
           version: 2.10.3
       - ansible/playbook:
-          playbook: lecture12/ansible/playbook.yml
-          playbook-options: "-u ec2-user -i lecture12/ansible/inventory --private-key ~/.ssh/udemysample.pem"
+          playbook: ansible/playbook.yml
+          playbook-options: "-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2.pem"
   # serverspec:
   #   executor: ruby/default
   #   steps:
@@ -57,11 +57,11 @@ workflows:
       - terraform/fmt:
           checkout: true
           context: terraform
-          path: lecture12/terraform/dev
+          path: terraform/dev
       - terraform/validate:
           checkout: true
           context: terraform
-          path: lecture12/terraform/dev
+          path: terraform/dev
           requires:
             - terraform/fmt
       - check_by_tflint:
@@ -70,14 +70,14 @@ workflows:
       - terraform/plan:
           checkout: true
           context: terraform
-          path: lecture12/terraform/dev
+          path: terraform/dev
           persist-workspace: true
           requires:
             - check_by_tflint
       - terraform/apply:
           attach-workspace: true
           context: terraform
-          path: lecture12/terraform/dev
+          path: terraform/dev
           filters:
             branches:
               only: main
