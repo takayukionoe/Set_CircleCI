@@ -31,12 +31,12 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - e8:25:05:90:24:a7:d9:15:36:0c:d5:d6:36:ee:9b:74
+            - e8:51:be:33:e3:5c:8c:fe:94:cc:c7:33:be:93:97:08
       - ansible/install:
           version: 2.10.3
       - ansible/playbook:
           playbook: ansible/playbook.yml
-          playbook-options: "-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2.pem"
+          playbook-options: "-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech13th.pem"
 
   # serverspec:
   #   executor: ruby/default
