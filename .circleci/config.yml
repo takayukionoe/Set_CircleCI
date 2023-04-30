@@ -81,7 +81,7 @@ workflows:
           path: terraform/dev
           filters:
             branches:
-              only: main
+              only: ansibleset
           requires:
             - terraform/plan
       - setup-by-ansible:
