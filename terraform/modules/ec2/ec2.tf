@@ -3,6 +3,7 @@ variable "vpc_id"{
 variable "public_subnet_a"{
 }
 
+
 resource "aws_instance" "ec2" {
   ami                    = "ami-01b32aa8589df6208"
   instance_type          = "t2.micro"
