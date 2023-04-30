@@ -37,6 +37,7 @@ jobs:
       - ansible/playbook:
           playbook: ansible/playbook.yml
           playbook-options: "-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech4thv2.pem"
+
   # serverspec:
   #   executor: ruby/default
   #   steps:
@@ -86,6 +87,7 @@ workflows:
       - setup-by-ansible:
           requires:
             - terraform/apply
+
       # - serverspec:
       #     requires:
       #       - setup-by-ansible
