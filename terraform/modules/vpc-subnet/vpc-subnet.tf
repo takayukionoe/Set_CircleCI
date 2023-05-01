@@ -43,13 +43,13 @@ resource "aws_subnet" "subnets_c" {
 ### サブネットグループ ####################
 
 resource "aws_db_subnet_group" "db_subnet_group" {
-  name = "db-subnet-group2"
+  name = "db-subnet-group"
   subnet_ids = [
     aws_subnet.subnets_a[1].id,
     aws_subnet.subnets_c[1].id
   ]
   tags = {
-    Name = "db-subnet-group2"
+    Name = "db-subnet-group"
   }
 }
 
