@@ -1,22 +1,9 @@
 ---
-- hosts: ec2
+- hosts: server
   become: yes
-  roles:
-    - { role: git, tags: git }
-    - { role: mysql, tags: mysql }
-    - { role: nodejs, tags: nodejs }
-    - { role: ruby, tags: ruby }
-    - { role: nginx, tags: nginx }
-    - { role: setup, tags: setup }
-    
-# - hosts: 18.181.38.231
-#   become: yes
-#   roles:
-#     - { role: git, tags: git }
-#     - { role: ruby, tags: ruby }
-#     - { role: package, tags: package }
-#     - { role: mysql, tags: mysql }
-#     - { role: clone, tags: clone }
-#     - { role: nginx, tags: nginx }
-#     - { role: unicorn, tags: unicorn }
-#     - { role: deploy, tags: deploy }
+  tasks:
+  - name: install git
+    yum:
+      name: git 
+      state: latest
+      
