@@ -24,7 +24,7 @@ resource "aws_lb" "alb" {
 }
 
 # ターゲットグループ
-resource "aws_lb_target_group" "alb_tg" {
+resource "aws_lb_target_group2" "alb_tg2" {
   name     = "alb-tg-lecture13"
   vpc_id   = var.vpc_id
   port     = "80"
