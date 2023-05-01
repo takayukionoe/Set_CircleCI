@@ -1,8 +1,9 @@
 ---
 - hosts: server
-  become: yes
+  # become: yes
+  remote_user: ec2-user
   tasks:
-  - name: install git
+  - name: install 
     yum:
       name: git 
       state: latest
