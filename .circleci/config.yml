@@ -1,92 +1,140 @@
 version: 2.1
-
 orbs:
-  terraform: circleci/terraform@3.1.0
-  terraform-tflint: hqo/terraform@1.0.3
-  ansible: orbss/ansible-playbook@0.0.5
-  aws-cli: circleci/aws-cli@3.1.3
-  ruby: circleci/ruby@1.8.0
-
-commands:
-  install-tflint:
-    description: "Install TFLint"
-    steps:
-      - run:
-          command: wget -P /tmp https://github.com/terraform-linters/tflint/releases/download/v0.38.1/tflint_linux_amd64.zip && unzip /tmp/tflint_linux_amd64.zip -d /usr/local/bin
+  python: circleci/python@2.0.3
+  ansible-playbook: orbss/ansible-playbook@0.0.5
+  ruby: circleci/ruby@2.0.0
 
 jobs:
-  check_by_tflint:
-    executor: terraform/default
+  cfn-lint:
+    executor: python/default
     steps:
-      - checkout
-      - install-tflint
-      - run:
-          name: tflint
-          command: |
-            cd terraform/dev && terraform init
-            tflint --init && tflint
-  setup-by-ansible:
-    executor: ansible/default
-    steps:
-      - checkout
-      - add_ssh_keys:
+    - checkout
+    - run: pip install cfn-lint
+    - run:
+        name: run cfn-lint
+        command: |
+          cfn-lint -i W3002 -t cloudformation/*.yml
+  build:
+    executor: ansible-playbook/default        
+    steps: 
+    - checkout
+    - add_ssh_keys:
           fingerprints:
-            - e8:51:be:33:e3:5c:8c:fe:94:cc:c7:33:be:93:97:08
-      - ansible/install:
-          version: 2.10.3
-      - ansible/playbook:
-          playbook: ansible/playbook.yml
-          playbook-options: "-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech13th.pem"
-
-  # serverspec:
-  #   executor: ruby/default
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: set
-  #         command: |
-  #           gem install bundler
-  #           gem install serverspec
-  #           gem install rake
-  #           echo ${KEY_FINGERPRINT} > ~/.ssh/serverspec.pem
-  #           mv lecture12/spec/config ~/.ssh/
-  #           cd lecture12
-  #           rake spec
+            - a2:e0:f6:29:6a:0d:4a:9e:1c:45:f6:78:b5:2d:17:3c
+    - ansible-playbook/install:
+        version: 2.9.23   
+    - run: ssh -o StrictHostKeyChecking=no ${USER_NAME}@${HOST_NAME} 'exit'    
+    - ansible-playbook/playbook: 
+        playbook: ansible/playbook.yml
+        playbook-options: "-i ansible/inventory"
+        
+  test:
+    executor: ruby/default
+    steps:
+      - checkout
+      - ruby/install-deps: 
+          app-dir: serverspec
+      - run: |
+          cd serverspec
+          bundle exec rake spec     
 workflows:
-  deploy_infrastructure:
+  raisetech:
     jobs:
-      - terraform/fmt:
-          checkout: true
-          context: terraform
-          path: terraform/dev
-      - terraform/validate:
-          checkout: true
-          context: terraform
-          path: terraform/dev
-          requires:
-            - terraform/fmt
-      - check_by_tflint:
-          requires:
-            - terraform/validate
-      - terraform/plan:
-          checkout: true
-          context: terraform
-          path: terraform/dev
-          persist-workspace: true
-          requires:
-            - check_by_tflint
-      - terraform/apply:
-          attach-workspace: true
-          context: terraform
-          path: terraform/dev
-          filters:
-            branches:
-              only: ansibleset
-          requires:
-            - terraform/plan
-      - setup-by-ansible:
-          requires:
-            - terraform/apply
+    - cfn-lint
+    - build
+    - test:
+        requires:
+        - build
+
+# version: 2.1
+
+# orbs:
+#   terraform: circleci/terraform@3.1.0
+#   terraform-tflint: hqo/terraform@1.0.3
+#   ansible: orbss/ansible-playbook@0.0.5
+#   aws-cli: circleci/aws-cli@3.1.3
+#   ruby: circleci/ruby@1.8.0
+
+# commands:
+#   install-tflint:
+#     description: "Install TFLint"
+#     steps:
+#       - run:
+#           command: wget -P /tmp https://github.com/terraform-linters/tflint/releases/download/v0.38.1/tflint_linux_amd64.zip && unzip /tmp/tflint_linux_amd64.zip -d /usr/local/bin
+
+# jobs:
+#   check_by_tflint:
+#     executor: terraform/default
+#     steps:
+#       - checkout
+#       - install-tflint
+#       - run:
+#           name: tflint
+#           command: |
+#             cd terraform/dev && terraform init
+#             tflint --init && tflint
+#   setup-by-ansible:
+#     executor: ansible/default
+#     steps:
+#       - checkout
+#       - add_ssh_keys:
+#           fingerprints:
+#             - e8:51:be:33:e3:5c:8c:fe:94:cc:c7:33:be:93:97:08
+#       - ansible/install:
+#           version: 2.10.3
+#       - ansible/playbook:
+#           playbook: ansible/playbook.yml
+#           playbook-options: "-u ec2-user -i ansible/inventory --private-key ~/.ssh/raisetech13th.pem"
+
+#   # serverspec:
+#   #   executor: ruby/default
+#   #   steps:
+#   #     - checkout
+#   #     - run:
+#   #         name: set
+#   #         command: |
+#   #           gem install bundler
+#   #           gem install serverspec
+#   #           gem install rake
+#   #           echo ${KEY_FINGERPRINT} > ~/.ssh/serverspec.pem
+#   #           mv lecture12/spec/config ~/.ssh/
+#   #           cd lecture12
+#   #           rake spec
+# workflows:
+#   deploy_infrastructure:
+#     jobs:
+#       - terraform/fmt:
+#           checkout: true
+#           context: terraform
+#           path: terraform/dev
+#       - terraform/validate:
+#           checkout: true
+#           context: terraform
+#           path: terraform/dev
+#           requires:
+#             - terraform/fmt
+#       - check_by_tflint:
+#           requires:
+#             - terraform/validate
+#       - terraform/plan:
+#           checkout: true
+#           context: terraform
+#           path: terraform/dev
+#           persist-workspace: true
+#           requires:
+#             - check_by_tflint
+#       - terraform/apply:
+#           attach-workspace: true
+#           context: terraform
+#           path: terraform/dev
+#           filters:
+#             branches:
+#               only: ansibleset
+#           requires:
+#             - terraform/plan
+#       - setup-by-ansible:
+#           requires:
+#             - terraform/apply
 
       # - serverspec:
       #     requires:
