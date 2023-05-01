@@ -1,0 +1,64 @@
+---
+# database.ymlの名称・内容の変更（.sampleになっているため）
+- name: Rename database.yml.sample to database.yml
+  command: mv database.yml.sample database.yml
+  args:
+    chdir: /var/www/raisetech-live8-sample-app/config
+    removes: database.yml.sample
+    creates: database.yml
+
+- name: Update database.yml with the correct content
+  template:
+    src: roles/deploy/templates/database.yml
+    dest: /var/www/raisetech-live8-sample-app/config/database.yml
+    owner: ec2-user
+    group: ec2-user
+    mode: '0644'
+
+
+# Railsの起動系
+
+- name: Create Rails database
+  ansible.builtin.command:
+    cmd: bundle exec rails db:create
+  args:
+    chdir: /var/www/raisetech-live8-sample-app
+
+- name: Run Rails database migrations
+  ansible.builtin.command:
+    cmd: bundle exec rails db:migrate
+  args:
+    chdir: /var/www/raisetech-live8-sample-app
+
+- name: Precompile Rails assets
+  ansible.builtin.command:
+    cmd: bundle exec rails assets:precompile
+  args:
+    chdir: /var/www/raisetech-live8-sample-app
+
+
+#nginxの起動
+- name: Start nginx service
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+  become: yes
+
+#unicornの起動
+- name: Start Unicorn with the specified configuration
+  ansible.builtin.shell:
+    cmd: bundle exec unicorn_rails -c config/unicorn.rb -D
+  args:
+    chdir: /var/www/raisetech-live8-sample-app
+
+- name: Check running Unicorn processes
+  ansible.builtin.shell:
+    cmd: ps aux | grep unicorn
+  register: unicorn_processes
+  changed_when: false
+
+- name: Display Unicorn processes
+  ansible.builtin.debug:
+    var: unicorn_processes.stdout_lines
+
+

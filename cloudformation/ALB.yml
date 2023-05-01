@@ -1,32 +1,32 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: ALB sample
-#stackname：stack01-2
+#stackname：ALB-01
 Resources:
   InternetALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: raisetech10th-ALB-02
+      Name: raisetech10th-ALB-03
       IpAddressType: ipv4
       Scheme: internet-facing
       Type: application
       SecurityGroups:
-           - !ImportValue stack01-3-Security01
+           - !ImportValue Security-01-Security01
       Subnets:
-           - !ImportValue stack01-1-PublicSubnet1A
-           - !ImportValue stack01-1-PublicSubnet1C
+           - !ImportValue VPC-subnet-01-PublicSubnet1A
+           - !ImportValue VPC-subnet-01-PublicSubnet1C
   
   TargetGroupResource:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: raisetech10th-target-02
-      VpcId: !ImportValue stack01-1-VPCID
+      Name: raisetech10th-target-03
+      VpcId: !ImportValue VPC-subnet-01-VPCID
       IpAddressType: ipv4
       Protocol: HTTP
       ProtocolVersion: HTTP1
       Port: 80
       TargetType: instance
       Targets:
-          - Id: !ImportValue stack01-4-EC2ID
+          - Id: !ImportValue EC2-01-EC2ID
             Port: 80
       HealthCheckEnabled: true
       HealthCheckIntervalSeconds: 30
@@ -40,7 +40,7 @@ Resources:
           HttpCode: 200
       Tags:
           - Key: Name
-            Value: raisetech10th-target-02
+            Value: raisetech10th-target-03
 
   ALBListenerHTTP:
         Type: AWS::ElasticLoadBalancingV2::Listener

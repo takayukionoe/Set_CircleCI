@@ -7,7 +7,7 @@ Resources:
         Properties:
             GroupName: launch-wizard
             GroupDescription: launch-wizard_CloudFormation
-            VpcId: !ImportValue stack01-1-VPCID
+            VpcId: !ImportValue VPC-subnet-01-VPCID
             SecurityGroupIngress:
                 - IpProtocol: tcp
                   CidrIp: 0.0.0.0/0
@@ -31,7 +31,7 @@ Resources:
         Properties:
             GroupName: raisetech10th_toEC2-2
             GroupDescription: raisetech10th_toEC2-2_CloudFormation
-            VpcId: !ImportValue stack01-1-VPCID
+            VpcId: !ImportValue VPC-subnet-01-VPCID
             SecurityGroupIngress:
                 - IpProtocol: tcp
                   CidrIp: 0.0.0.0/0
@@ -64,7 +64,7 @@ Resources:
         Properties:
             GroupName: raisetech10th-DB-wizard-02
             GroupDescription: raisetech10th-DB-wizard-02_CloudFormation
-            VpcId: !ImportValue stack01-1-VPCID
+            VpcId: !ImportValue VPC-subnet-01-VPCID
 
     SecurityGroupIgress2:
         Type: AWS::EC2::SecurityGroupIngress
@@ -76,7 +76,7 @@ Resources:
             SourceSecurityGroupId: !Ref SecurityGroup02
 
 Outputs:
-#stackname：stack01-3
+#stackname：Security-01
     StackSecurity01:
         Description: SecurityGroup01 ID
         Value: !Ref SecurityGroup01

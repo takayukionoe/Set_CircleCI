@@ -1,0 +1,63 @@
+---
+# yumでパッケージのインストール
+- name: Install required dependencies
+  become: yes
+  yum:
+    name:
+      - gcc-c++
+      - make
+      - patch
+      - curl
+      - zlib-devel
+      - openssl-devel
+      - ImageMagick-devel
+      - readline-devel
+      - libcurl-devel
+      - libffi-devel
+      - libicu-devel
+      - libxml2-devel
+      - libxslt-devel
+      - mysql-devel
+    state: latest
+
+# nodejsのインストール
+- name: Add nodejs repository
+  ansible.builtin.shell:
+    cmd: curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
+
+- name: Install nodejs
+  ansible.builtin.yum:
+    name: nodejs
+    state: present
+
+# yarnのインストール
+- name: Add Yarn repository
+  ansible.builtin.shell:
+    cmd: curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
+
+- name: Install Yarn
+  ansible.builtin.yum:
+    name: yarn
+    state: present
+
+- name: Check Yarn version
+  ansible.builtin.command:
+    cmd: yarn --version
+  register: yarn_version
+  changed_when: false
+
+- name: Display Yarn version
+  ansible.builtin.debug:
+    var: yarn_version.stdout
+
+# Bundlerインストール
+- name: Install Bundler version 2.3.14
+  become: yes
+  command: gem install bundler:2.3.14
+
+- name: Run bundle install
+  command: bundle install
+  args:
+    chdir: /var/www/raisetech-live8-sample-app
+
+

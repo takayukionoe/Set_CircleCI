@@ -1,0 +1,16 @@
+---
+- name: Install nginx
+  become: yes
+  ansible.builtin.package:
+    name: nginx
+    state: present
+
+- name: Copy raisetech-live8-sample-app.conf
+  become: yes
+  ansible.builtin.template:
+    src: raisetech-live8-sample-app.conf.j2
+    dest: /etc/nginx/conf.d/raisetech-live8-sample-app.conf
+    owner: ec2-user
+    group: ec2-user
+    mode: 0644
+

@@ -1,0 +1,13 @@
+---
+- name: Update listen directive in unicorn.rb
+  ansible.builtin.lineinfile:
+    path: /var/www/raisetech-live8-sample-app/config/unicorn.rb
+    regexp: '^listen.*'
+    line: "listen '/var/www/raisetech-live8-sample-app/unicorn.sock'"
+
+- name: Update pid directive in unicorn.rb
+  ansible.builtin.lineinfile:
+    path: /var/www/raisetech-live8-sample-app/config/unicorn.rb
+    regexp: '^pid.*'
+    line: "pid '/var/www/raisetech-live8-sample-app/unicorn.pid'"
+
