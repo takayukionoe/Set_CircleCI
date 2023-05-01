@@ -23,7 +23,6 @@ jobs:
             - a2:e0:f6:29:6a:0d:4a:9e:1c:45:f6:78:b5:2d:17:3c
     - ansible-playbook/install:
         version: 2.9.23   
-    - run: ssh -o StrictHostKeyChecking=no ${USER_NAME}@${HOST_NAME} 'exit'    
     - ansible-playbook/playbook: 
         playbook: ansible/playbook.yml
         playbook-options: "-i ansible/inventory"
